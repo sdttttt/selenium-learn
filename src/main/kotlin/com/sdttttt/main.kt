@@ -1,60 +1,84 @@
 package com.sdttttt
 
-import org.openqa.selenium.By
-import org.openqa.selenium.WebDriver
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import org.openqa.selenium.*
 import org.openqa.selenium.chrome.ChromeDriver
 import java.time.Duration
 
-import kotlinx.coroutines.*
-import org.openqa.selenium.WindowType
-import org.openqa.selenium.support.ui.WebDriverWait
+import java.util.concurrent.TimeUnit
 
-fun main(args: Array<String>) {
-    runBlocking {
+fun main(args: Array<String>): Unit = runBlocking {
 
-        if (args.size > 0) {
-            System.setProperty("webdriver.chrome.driver", args[0])
-        } else {
-            System.setProperty("webdriver.chrome.driver", "D:\\GO study\\bin\\chromedriver.exe")
-        }
+    if (args.size > 0) {
+        System.setProperty("webdriver.chrome.driver", args[0])
+    } else {
+        System.setProperty("webdriver.chrome.driver", "D:\\GO study\\bin\\chromedriver.exe")
+    }
 
+    val driver = ChromeDriver()
+    try {
+        with(driver) {
+            manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS)
 
-        val driver: WebDriver = ChromeDriver()
+            // 打开对应网址
+            navigate().to("https://baidu.com")
 
-        val wait = WebDriverWait(driver, Duration.ofSeconds(2))
+            println("当前网址是：$currentUrl")
+            println("当前标题是：$title")
+            println("当前窗口句柄：$windowHandle")
 
-        try {
-            with(driver) {
-                // 打开对应网址
-                navigate().to("https://baidu.com")
+            manage().window().position = Point(0,0)
+            delay(Duration.ofSeconds(1).toMillis())
 
-                println("当前网址是：$currentUrl")
-                println("当前标题是：$title")
-                println("当前窗口句柄：$windowHandle")
+            manage().window().maximize()
+            delay(Duration.ofSeconds(1).toMillis())
 
-                // 在指定元素输入内容
-                findElement(By.id("kw")).sendKeys("Hello World")
-                // driver.findElement(By.cssSelector("input[type=submit]")).click()
-                findElement(By.id("su")).click()
-                Duration.ofSeconds(5).toMillis()
-                Duration.ofSeconds(5).toMillis()
+            // 在指定元素输入内容
+            findElement(By.id("kw")).sendKeys("webdriver" + Keys.ENTER)
+            // driver.findElement(By.cssSelector("input[type=submit]")).click()
+            // findElement(By.id("su")).click()
+            val baiduTab = windowHandle
 
+            if (windowHandles.size == 1) {
+                println("只打开了一个窗口")
+            }
 
-                if (windowHandles.size == 1) {
-                    println("只打开了一个窗口")
+            delay(Duration.ofSeconds(1).toMillis())
+
+            findElement(By.id("content_left"))
+                .findElements(By.cssSelector("div.result.c-container.new-pmd")).forEach {
+                    it
+                        .findElement(By.cssSelector("h3 > a"))
+                        .click()
                 }
 
-                switchTo().newWindow(WindowType.TAB)
+            delay(Duration.ofSeconds(1).toMillis())
 
-                wait.until(numberOfWindowsToBe())
-                delay(Duration.ofSeconds(5).toMillis())
+            switchTo().newWindow(WindowType.TAB)
+
+            delay(Duration.ofSeconds(1).toMillis())
+            for (handle in windowHandles) {
+                if (baiduTab.contentEquals(handle)) {
+                    switchTo().window(baiduTab)
+                }
             }
-        } catch (e: Exception) {
-            println(e.message)
-        } finally {
-            driver.quit()
+
+            delay(Duration.ofSeconds(1).toMillis())
+
+            windowHandles.forEach {
+                delay(Duration.ofSeconds(1).toMillis())
+                switchTo().window(it).close()
+            }
+
+            delay(Duration.ofSeconds(1).toMillis())
         }
+    } catch (e: Exception) {
+        println(e.message)
+    } finally {
+        driver.quit()
     }
 }
+
 
 fun numberOfWindowsToBe(): (WebDriver) -> Boolean = { it.windowHandles.size > 1 }
