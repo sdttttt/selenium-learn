@@ -5,51 +5,14 @@ import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.openqa.selenium.*
-import org.openqa.selenium.chrome.ChromeDriver
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-class BaiduSelenium constructor(val driver: WebDriver,val driverPath: String) {
+class Baidu(driver: WebDriver, driverPath: String) : AbstractSelenium(driver, driverPath) {
 
-    val logger: Logger
+    override val logger: Logger = LogManager.getLogger(this::class)
 
-    init {
-        logger = LogManager.getLogger(this::class)
-        logger.info("""
-           
-                    OS: ${System.getProperty("os.name")}
-                    ARCH: ${System.getProperty("os.arch")}
-        """)
-    }
-
-    fun runTest(): Unit = runBlocking {
-
-        if (driver is ChromeDriver) {
-            if (System.getProperty("os.name").startsWith("Windows")) {
-            val driverType = "webdriver.chrome.driver"
-            val driverPath = "D:\\GO study\\bin\\chromedriver.exe"
-            logger.info("""
-            
-                    TYPE: $driverType
-                    PATH: $driverPath
-            """)
-            System.setProperty(driverType, driverPath)
-            } else {
-                logger.error("""
-
-                    当前不支持Linux.
-                """)
-                return@runBlocking
-            }
-        } else {
-            logger.error("""
-
-                    当前不支持Chrome以外的WebDriver.
-            """)
-            return@runBlocking
-        }
-
-        try {
+    override fun runTest(): Unit = runBlocking {
             with(driver) {
                 manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS)
 
@@ -71,11 +34,11 @@ class BaiduSelenium constructor(val driver: WebDriver,val driverPath: String) {
                 delay(Duration.ofSeconds(1).toMillis())
 
                 // 在指定元素输入内容
-                findElement(By.id("kw")).sendKeys("Baidu" + Keys.ENTER)
+                findElement(By.id("kw")).sendKeys("Baidu", Keys.ENTER)
                 logger.info("输入关键词, 回车.")
                 // driver.findElement(By.cssSelector("input[type=submit]")).click()
                 // findElement(By.id("su")).click()
-                val baiduTab = windowHandle
+                val baiduTab: String = windowHandle
 
                 if (windowHandles.size == 1) {
                     logger.info("只打开了一个窗口")
@@ -117,18 +80,6 @@ class BaiduSelenium constructor(val driver: WebDriver,val driverPath: String) {
 
                 delay(Duration.ofSeconds(1).toMillis())
             }
-        } catch (e: Exception) {
-            logger.error("""
-                
-                    沃日, 出错了: ${e.message}    
-            """)
-        } finally {
-            driver.quit()
-            logger.info("退出浏览器.")
-        }
-
-        logger.info("测试结束.")
     }
 
-    fun numberOfWindowsToBe(): (WebDriver) -> Boolean = { it.windowHandles.size > 1 }
 }

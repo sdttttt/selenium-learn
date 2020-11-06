@@ -1,21 +1,19 @@
 package com.sdttttt
 
 import kotlinx.coroutines.runBlocking
+import org.apache.logging.log4j.Logger
 import org.openqa.selenium.chrome.ChromeDriver
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>): Unit = runBlocking {
-
-    var path: String
-
-    if (args.size > 0) {
-        path = args[0]
+    val path: String = if (args.size > 0) {
+        args[0]
     } else {
-        path = "classpath: chromedriver.exe"
+        "classpath: chromedriver.exe"
     }
 
     val driver = ChromeDriver()
-    BaiduSelenium(driver, path).runTest()
-
+    // Baidu(driver, path).run()
+    MG4399(driver, path).run()
     exitProcess(0)
 }
