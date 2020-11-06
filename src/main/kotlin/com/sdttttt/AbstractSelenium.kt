@@ -38,8 +38,8 @@ abstract class AbstractSelenium(protected open val driver: WebDriver, protected 
 
     abstract fun runTest(): Unit
 
-    fun run() {
-        if (!beforeCheck()) return
+    fun run(): Boolean {
+        if (!beforeCheck()) return false
         try {
             runTest()
         } catch (e: Exception) {
@@ -47,12 +47,14 @@ abstract class AbstractSelenium(protected open val driver: WebDriver, protected 
                 
                     沃日, 出错了: ${e.message}    
             """)
+            return false
         } finally {
             driver.quit()
             logger.info("退出浏览器.")
         }
 
         logger.info("测试结束.")
+        return true
     }
 
     fun stop(seconds: Long): Unit = runBlocking{
