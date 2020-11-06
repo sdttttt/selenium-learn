@@ -1,8 +1,12 @@
 package com.sdttttt
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.apache.logging.log4j.Logger
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
+import java.time.Duration
 
 abstract class AbstractSelenium(protected open val driver: WebDriver, protected open val driverPath: String) {
 
@@ -51,6 +55,9 @@ abstract class AbstractSelenium(protected open val driver: WebDriver, protected 
         logger.info("测试结束.")
     }
 
+    fun stop(seconds: Long): Unit = runBlocking{
+        delay(Duration.ofSeconds(seconds).toMillis())
+    }
 
     fun Logger.bigInfo(vararg args: String) {
         if (args.size < 1) return

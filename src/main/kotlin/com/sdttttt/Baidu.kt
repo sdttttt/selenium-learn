@@ -44,7 +44,7 @@ class Baidu(driver: WebDriver, driverPath: String) : AbstractSelenium(driver, dr
                     logger.info("只打开了一个窗口")
                 }
 
-                delay(Duration.ofSeconds(1).toMillis())
+                stop(1)
 
                 logger.info("找到所有搜索到的网页, 一个个打开...")
                 findElement(By.id("content_left"))
